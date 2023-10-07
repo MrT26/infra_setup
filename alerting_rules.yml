@@ -1,0 +1,31 @@
+groups:
+  - name: common-alerts
+    rules:
+      - alert: ServerIsDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Server is down (instance {{ $labels.instance }})"
+          description: "The server has been unreachable for the last 1 minutes."
+
+      - alert: HostHighCPULoad
+        expr: (1 - (sum by(instance) (irate(node_cpu{job="node_exporter_matrics",mode="idle"}[1m])))) > 0.3
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          description: "The CPU load on the host has exceeded 70% for the last 1 minute."
+          summary: "CPU load is > 30% (instance {{ $labels.instance }})"
+
+
+      - alert: HostOutOfMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host is running out of memory (instance {{ $labels.instance }})"
+          description: "Less than 10% of memory is available on the host."
+
